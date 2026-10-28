@@ -262,21 +262,29 @@ void sensorsMpu9250Lps25hWaitDataReady(void)
 
 void processBarometerMeasurements(const uint8_t *buffer)
 {
-  static uint32_t rawPressure = 0;
-  static int16_t rawTemp = 0;
+    float pressure = 0.0f;
+    float temperature = 0.0f;
+    float asl = 0.0f; 
 
-  // Check if there is a new pressure update
-  if (buffer[0] & 0x02) {
-    rawPressure = ((uint32_t) buffer[3] << 16) | ((uint32_t) buffer[2] << 8) | buffer[1];
-  }
-  // Check if there is a new temp update
-  if (buffer[0] & 0x01) {
-    rawTemp = ((int16_t) buffer[5] << 8) | buffer[4];
-  }
+    // Mengambil data dari BMP280
+    bmp280GetData(&pressure, &temperature, &asl);
 
-  sensorData.baro.pressure = (float) rawPressure / LPS25H_LSB_PER_MBAR;
-  sensorData.baro.temperature = LPS25H_TEMP_OFFSET + ((float) rawTemp / LPS25H_LSB_PER_CELSIUS);
-  sensorData.baro.asl = lps25hPressureToAltitude(&sensorData.baro.pressure);
+    // Sistem Kalibrasi Ketinggian Relatif (AGL)
+    static float asl_zero = 0.0f;
+    static bool is_calibrated = false;
+
+    // Menangkap nilai ketinggian pertama saat sensor aktif
+    if (!is_calibrated && asl != 0.0f) {
+        asl_zero = asl;
+        is_calibrated = true;
+    }
+    else {
+        // Ketinggian saat ini dikurangi ketinggian awal = 0 meter relatif!
+        sensorData.baro.asl = asl - asl_zero; 
+    }
+    // Menyuntikkan langsung ke struktur otak drone
+    sensorData.baro.pressure = pressure; 
+    sensorData.baro.temperature = temperature;
 }
 
 void processMagnetometerMeasurements(const uint8_t *buffer)
@@ -924,11 +932,11 @@ LOG_GROUP_STOP(gyro)
 
 PARAM_GROUP_START(imu_sensors)
 PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, HMC5883L, &isMagnetometerPresent)
-PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, MS5611, &isBarometerPresent) // TODO: Rename MS5611 to LPS25H. Client needs to be updated at the same time.
+PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, BMP280, &isBarometerPresent) // TODO: Rename BMP280 to LPS25H. Client needs to be updated at the same time.
 PARAM_GROUP_STOP(imu_sensors)
 
 PARAM_GROUP_START(imu_tests)
 PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, MPU6500, &isMpu6500TestPassed)
 PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, HMC5883L, &isAK8963TestPassed)
-PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, MS5611, &isLPS25HTestPassed) // TODO: Rename MS5611 to LPS25H. Client needs to be updated at the same time.
+PARAM_ADD(PARAM_UINT8 | PARAM_RONLY, BMP280, &isLPS25HTestPassed) // TODO: Rename BMP280 to LPS25H. Client needs to be updated at the same time.
 PARAM_GROUP_STOP(imu_tests)

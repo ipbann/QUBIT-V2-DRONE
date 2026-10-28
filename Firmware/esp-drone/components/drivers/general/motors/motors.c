@@ -110,7 +110,7 @@ bool pwm_timmer_init()
         .freq_hz = 15000,					// frequency of PWM signal
         .speed_mode = LEDC_LOW_SPEED_MODE, // timer mode
         .timer_num = LEDC_TIMER_0,			// timer index
-        // .clk_cfg = LEDC_AUTO_CLK,              // Auto select the source clock
+        .clk_cfg = LEDC_AUTO_CLK,              // Auto select the source clock
     };
 
     // Set configuration of timer0 for high speed channels
@@ -137,6 +137,7 @@ void motorsInit(const MotorPerifDef **motorMapSelect)
     motorMap = motorMapSelect;
 
     if (pwm_timmer_init() != TRUE) {
+        DEBUG_PRINTI("FATAL: PWM Timer Gagal Inisialisasi!\n");
         return;
     }
 
@@ -145,6 +146,7 @@ void motorsInit(const MotorPerifDef **motorMapSelect)
     }
 
     isInit = true;
+    DEBUG_PRINTI("MOTORS DRIVER [OK] - Siap Berputar!\n");
 }
 
 void motorsDeInit(const MotorPerifDef **motorMapSelect)

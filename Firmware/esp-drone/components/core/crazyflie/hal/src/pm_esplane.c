@@ -97,16 +97,16 @@ static void pmSetBatteryVoltage(float voltage);
 
 const static float bat671723HS25C[10] =
 {
-  3.00, // 00%
-  3.78, // 10%
-  3.83, // 20%
-  3.87, // 30%
-  3.89, // 40%
-  3.92, // 50%
-  3.96, // 60%
-  4.00, // 70%
-  4.04, // 80%
-  4.10  // 90%
+  3.15, // 00% (Batas kritis. Jika sampai 3.1V, motor mati untuk melindungi baterai)
+  3.60, // 10% (Segera mendarat, tenaga sudah sangat loyo)
+  3.70, // 20%
+  3.78, // 30%
+  3.85, // 40%
+  3.90, // 50% (Tegangan nominal stabil LiHV saat terbang)
+  3.98, // 60%
+  4.06, // 70%
+  4.15, // 80%
+  4.25  // 90%
 };
 
 STATIC_MEM_TASK_ALLOC(pmTask, PM_TASK_STACKSIZE);
@@ -117,7 +117,8 @@ void pmInit(void)
     return;
   }
 
-    pmEnableExtBatteryVoltMeasuring(CONFIG_ADC1_PIN, 2); // ADC1 PIN is fixed to ADC channel
+    // pmEnableExtBatteryVoltMeasuring(CONFIG_ADC1_PIN, 2); // ADC1 PIN is fixed to ADC channel
+    pmEnableExtBatteryVoltMeasuring(35, 2.15f); // 35 adalah GPIO, 2.0f adalah Multiplier (Pengali)
 
     pmSyslinkInfo.pgood = false;
     pmSyslinkInfo.chg = false;

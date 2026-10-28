@@ -25,7 +25,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-//#include "deck.h"
 #include "system.h"
 #include "debug_cf.h"
 #include "log.h"
@@ -49,72 +48,9 @@ static float expCoeff;
 #define RANGE_OUTLIER_LIMIT 3000 // the measured range is in [mm]
 
 static uint16_t range_last = 0;
-
+static uint16_t last_update_tick = 0;
 static bool isInit;
-
 static VL53L0xDev dev;
-
-static uint8_t vl53l0dataReady = 0;
-
-static int16_t range1;
-static int16_t dataready = 0;
-
-int16_t zRangerMeasurementAndRestart()
-{
-	if (isInit == false)
-	{
-		return -1;
-	}
-  uint8_t val = 0;
-	i2cdevReadByte(dev.I2Cx, dev.devAddr, VL53L0X_RA_RESULT_INTERRUPT_STATUS, &val);
-
-  if ((val & 0x07) == 0)
-  {
-    vl53l0dataReady = 0;
-
-  }else
-  {
-    vl53l0dataReady = 1;
-  }
-    
-
-	if (vl53l0dataReady != 0)
-	{
-
-   // assumptions: Linearity Corrective Gain is 1000 (default);
-  // fractional ranging is not enabled
-  uint16_t rangetemp = vl53l0xReadReg16Bit(&dev, VL53L0X_RA_RESULT_RANGE_STATUS + 10);
-
-		if (rangetemp != 0)
-		{
-			range1 = rangetemp;
-			dataready = 1;
-		}
-		else
-		{
-			return -2;
-		}
-
-		i2cdevWriteByte(dev.I2Cx, dev.devAddr, VL53L0X_RA_SYSTEM_INTERRUPT_CLEAR, 0x01);; //clear Interrupt start next measurement
-	}
-	else
-	{
-		return -3;
-	}
-	return 0;
-}
-
-static int16_t zRangerGetMeasurementAndRestart(VL53L0xDev *dev)
-{
-
-	int16_t range;
-	while (dataready == 0)
-	{
-		vTaskDelay(M2T(20));
-	}
-	dataready = 0;
-	return range = range1;
-}
 
 void zRangerInit(void)
 {
@@ -123,9 +59,10 @@ void zRangerInit(void)
 
   dev.I2Cx = 0;
   dev.devAddr = VL53L0X_DEFAULT_ADDRESS;
+  dev.I2Cx = I2C0_DEV;
   i2cdevInit(dev.I2Cx);
 
-  dev.io_timeout = 0;
+  dev.io_timeout = 2000; // Timeout 2 detik yang aman
   dev.did_timeout = 0;
   dev.timeout_start_ms = 0;
   dev.stop_variable = 0;
@@ -134,20 +71,28 @@ void zRangerInit(void)
 
   vTaskDelay(M2T(20));
 
+  // 1. HARD RESET SOFTWARE: Memastikan memori sensor bersih
+  DEBUG_PRINTI("VL53L0X Soft Reset...\n");
+  i2cdevWriteByte(dev.I2Cx, dev.devAddr, 0xBF, 0x00);
+  vTaskDelay(M2T(20));
+  i2cdevWriteByte(dev.I2Cx, dev.devAddr, 0xBF, 0x01);
+  vTaskDelay(M2T(50));
+
   uint16_t wordData;
   wordData = vl53l0xGetModelID(&dev);
-  DEBUG_PRINTI( "VL53L0X: %02X\n\r", wordData);
+  DEBUG_PRINTI("VL53L0X ID: %02X\n", wordData);
 
-  if(wordData == VL53L0X_ID)
-	{
-    DEBUG_PRINT( "VL53L0X I2C commection [OK].\n");
+  // 2. INISIALISASI: Harus dipanggil dengan parameter io_2V8 = true
+  if (!vl53l0xInit(&dev, I2C1_DEV, true)) {
+     DEBUG_PRINTW(">>> ERROR: Kalibrasi VL53L0X GAGAL! <<<\n");
+  } else {
+     DEBUG_PRINTI(">>> SUKSES: Kalibrasi VL53L0X BERHASIL! <<<\n");
   }
 
-  vl53l0xInit(&dev, I2C1_DEV, true);
-
+  // Buat Task untuk pembacaan jarak (ditidurkan hingga sistem siap)
   xTaskCreate(zRangerTask, ZRANGER_TASK_NAME, ZRANGER_TASK_STACKSIZE, NULL, ZRANGER_TASK_PRI, NULL);
 
-  // pre-compute constant in the measurement noise model for kalman
+  // Pre-compute constant in the measurement noise model for kalman
   expCoeff = logf(expStdB / expStdA) / (expPointB - expPointA);
 
   isInit = true;
@@ -167,29 +112,46 @@ bool zRangerTest(void)
 
 void zRangerTask(void* arg)
 {
+  // Tunggu semua kalibrasi selesai (MPU6050 dll)
   systemWaitStart();
   TickType_t xLastWakeTime;
 
-  vl53l0xSetVcselPulsePeriod(&dev, VcselPeriodPreRange, 18);/*长距离模式  33ms 周期*/
-  vl53l0xSetVcselPulsePeriod(&dev, VcselPeriodFinalRange, 14);/*长距离模式  33ms 周期*/
+  // 3. Mulai ambil data beruntun (Continuous) tanpa modifikasi pulse period
   vl53l0xStartContinuous(&dev, 0);
   
   xLastWakeTime = xTaskGetTickCount();
 
   while (1) {
-    vTaskDelayUntil(&xLastWakeTime, M2T(dev.measurement_timing_budget_ms));
+    // Jeda 30ms (Sesuai timing budget sensor Default)
+    vTaskDelayUntil(&xLastWakeTime, M2T(30));
 
-    range_last = zRangerGetMeasurementAndRestart(&dev);
-    rangeSet(rangeDown, range_last / 1000.0f);
-    DEBUG_PRINTD("ZRANGE = %f",range_last/ 1000.0f);
+    uint8_t val = 0;
+    
+    // 4. BACA INTERUPSI (Non-Blocking Polling)
+    i2cdevReadByte(dev.I2Cx, dev.devAddr, VL53L0X_RA_RESULT_INTERRUPT_STATUS, &val);
 
-    // check if range is feasible and push into the estimator
-    // the sensor should not be able to measure >3 [m], and outliers typically
-    // occur as >8 [m] measurements
-    if (range_last < RANGE_OUTLIER_LIMIT) {
-      float distance = (float)range_last * 0.001f; // Scale from [mm] to [m]
-      float stdDev = expStdA * (1.0f  + expf( expCoeff * (distance - expPointA)));
-      rangeEnqueueDownRangeInEstimator(distance, stdDev, xTaskGetTickCount());
+    if ((val & 0x07) != 0) { 
+      
+      // Ambil jarak dari register
+      uint16_t range = vl53l0xReadReg16Bit(&dev, VL53L0X_RA_RESULT_RANGE_STATUS + 10);
+      
+      // Bersihkan interupsi agar sensor mengukur data berikutnya
+      i2cdevWriteByte(dev.I2Cx, dev.devAddr, VL53L0X_RA_SYSTEM_INTERRUPT_CLEAR, 0x01);
+
+      // Saring error 65535 dan batas rasional
+      // Di dalam if (range > 0 && range < 8000)
+      if (range > 0 && range < 8000) {
+        range_last = range;
+        last_update_tick = xTaskGetTickCount(); // <--- TAMBAHKAN BARIS INI
+        float distance = (float)range_last * 0.001f; 
+        
+        // DEBUG_PRINTI("ZRANGE = %f\n", distance); // (Sebaiknya di-comment agar log terminal tidak berat)
+        
+        if (range_last < RANGE_OUTLIER_LIMIT) {
+          float stdDev = expStdA * (1.0f  + expf( expCoeff * (distance - expPointA)));
+          rangeEnqueueDownRangeInEstimator(distance, stdDev, last_update_tick); // Gunakan last_update_tick
+        }
+      }
     }
   }
 }
@@ -199,15 +161,19 @@ bool zRangerReadRange(zDistance_t* zrange, const uint32_t tick)
   bool updated = false;
 
   if (isInit) {
-    if (range_last != 0 && range_last < RANGE_OUTLIER_LIMIT) {
-      zrange->distance = (float)range_last * 0.001f; // Scale from [mm] to [m]
-      zrange->timestamp = tick;
+    // Cek: Apakah datanya ada, masuk akal, DAN belum kedaluwarsa (umur < 100ms)?
+    if (range_last != 0 && range_last < RANGE_OUTLIER_LIMIT && (tick - last_update_tick) < M2T(100)) {
+      zrange->distance = (float)range_last * 0.001f; // Skala ke meter
+      zrange->timestamp = last_update_tick; // Gunakan stempel waktu asli data, bukan tick baru
       updated = true;
     }
   }
   return updated;
 }
 
+// -------------------------------------------------------------
+// DECK DRIVER DIBIARKAN TER-COMMENT KARENA CUSTOM BOARD
+// -------------------------------------------------------------
 // static const DeckDriver zranger_deck = {
 //   .vid = 0xBC,
 //   .pid = 0x09,

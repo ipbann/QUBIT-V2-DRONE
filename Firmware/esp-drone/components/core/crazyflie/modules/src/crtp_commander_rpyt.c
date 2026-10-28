@@ -71,15 +71,15 @@ typedef enum
   XMODE     = 2, // X-mode. M1 & M4 are defined as front
 } YawModeType;
 
-static RPYType stabilizationModeRoll  = ANGLE; // Current stabilization type of roll (rate or angle)
-static RPYType stabilizationModePitch = ANGLE; // Current stabilization type of pitch (rate or angle)
+static RPYType stabilizationModeRoll  = RATE; // Current stabilization type of roll (rate or angle)
+static RPYType stabilizationModePitch = RATE; // Current stabilization type of pitch (rate or angle)
 static RPYType stabilizationModeYaw   = RATE;  // Current stabilization type of yaw (rate or angle)
 
 static YawModeType yawMode = DEFAULT_YAW_MODE; // Yaw mode configuration
 static bool carefreeResetFront;             // Reset what is front in carefree mode
 
-static bool thrustLocked = true;
-static bool altHoldMode = false;
+static bool thrustLocked = false;
+static bool altHoldMode = true;
 static bool posHoldMode = false;
 static bool posSetMode = false;
 
@@ -90,15 +90,15 @@ static bool posSetMode = false;
  */
 void setCommandermode(FlightMode mode){
 #ifdef CONFIG_ENABLE_COMMAND_MODE_SET
-  switch (mode) {
+  switch (ALTHOLD_MODE) {
   case ALTHOLD_MODE:
     altHoldMode = true;
     posHoldMode = false;
     posSetMode = false;
-    registerRequiredEstimator(complementaryEstimator);
+    registerRequiredEstimator(kalmanEstimator);
     break;
   case POSHOLD_MODE:
-    altHoldMode = true;
+    altHoldMode = false;
     posHoldMode = true;
     posSetMode = false;
     registerRequiredEstimator(kalmanEstimator); 

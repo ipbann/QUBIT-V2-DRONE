@@ -71,7 +71,7 @@ struct this_s {
 };
 
 // Maximum roll/pitch angle permited
-static float rpLimit  = 20;
+static float rpLimit  = 17;
 static float rpLimitOverhead = 1.10f;
 // Velocity maximums
 static float xyVelMax = 1.0f;
@@ -88,8 +88,8 @@ static struct this_s this = {
   .pidVX = {
     .init = {
       .kp = 25.0f,
-      .ki = 1.0f,
-      .kd = 0.0f,
+      .ki = 1.2f,
+      .kd = 0.0000f,
     },
     .pid.dt = DT,
   },
@@ -97,17 +97,17 @@ static struct this_s this = {
   .pidVY = {
     .init = {
       .kp = 25.0f,
-      .ki = 1.0f,
-      .kd = 0.0f,
+      .ki = 1.1f,
+      .kd = 0.00f,
     },
     .pid.dt = DT,
   },
 
   .pidVZ = {
     .init = {
-      .kp = 22,
-      .ki = 15,
-      .kd = 0,
+      .kp = 15.0,
+      .ki = 1.2,
+      .kd = 0.0000,
     },
     .pid.dt = DT,
   },
@@ -116,7 +116,7 @@ static struct this_s this = {
     .init = {
       .kp = 1.9f,
       .ki = 0.1f,
-      .kd = 0,
+      .kd = 0.00000,
     },
     .pid.dt = DT,
   },
@@ -124,17 +124,17 @@ static struct this_s this = {
   .pidY = {
     .init = {
       .kp = 1.9f,
-      .ki = 0.1f,
-      .kd = 0,
+      .ki = 0.15f,
+      .kd = 0.00000,
     },
     .pid.dt = DT,
   },
 
   .pidZ = {
     .init = {
-      .kp = 1.6f,
+      .kp = 1.0,
       .ki = 0.5,
-      .kd = 0,
+      .kd = 0.00000,
     },
     .pid.dt = DT,
   },
@@ -149,8 +149,9 @@ static struct this_s this = {
   .thrustMin  = 20000,
   #endif
 #else
-  .thrustBase = 24000,
-  .thrustMin  = 5000,
+  // Setting khusus untuk LDARC 8520 12000KV + Baterai LiHV
+  .thrustBase = 34500, // Tebakan awal yang aman (sekitar 42% gas)
+  .thrustMin  = 6500,  // Sedikit dinaikkan agar motor tidak "stall" (mati) saat menukik turun
 #endif
 
 };

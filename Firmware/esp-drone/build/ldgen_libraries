@@ -67,6 +67,7 @@ C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/mqtt/libmqtt.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/openssl/libopenssl.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/perfmon/libperfmon.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/spiffs/libspiffs.a
+C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/usb/libusb.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/ulp/libulp.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/main/libmain.a
@@ -75,7 +76,7 @@ C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/platform/libplatfor
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/i2c_bus/libi2c_bus.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/deck/libdeck.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/mpu6050/libmpu6050.a
-C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/ms5611/libms5611.a
+C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/bmp280/libbmp280.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/hmc5883l/libhmc5883l.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/pmw3901/libpmw3901.a
 C:/AMX/QUBIT/ESP-Drone-main/Firmware/esp-drone/build/esp-idf/vl53l1/libvl53l1.a

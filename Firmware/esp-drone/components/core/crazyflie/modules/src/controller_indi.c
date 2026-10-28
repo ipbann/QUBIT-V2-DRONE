@@ -219,14 +219,17 @@ void controllerINDI(control_t *control, setpoint_t *setpoint,
 			}
 		}
 		
-
-//	    attitudeControllerCorrectAttitudePID(state->attitude.roll, state->attitude.pitch, state->attitude.yaw,
-//	                                attitudeDesired.roll, attitudeDesired.pitch, attitudeDesired.yaw,
-//	                                &rateDesired.roll, &rateDesired.pitch, &rateDesired.yaw);
+		//ini tadi dikasih command-------
+	    attitudeControllerCorrectAttitudePID(state->attitude.roll, state->attitude.pitch, state->attitude.yaw,
+	                                attitudeDesired.roll, attitudeDesired.pitch, attitudeDesired.yaw,
+	                                &rateDesired.roll, &rateDesired.pitch, &rateDesired.yaw);
+		//------
 
 		rateDesired.roll = roll_kp*(attitudeDesired.roll - state->attitude.roll);
 		rateDesired.pitch = pitch_kp*(attitudeDesired.pitch - state->attitude.pitch);
-		//rateDesired.yaw = yaw_kp*(attitudeDesired.yaw - state->attitude.yaw);
+		//--
+		rateDesired.yaw = yaw_kp*(attitudeDesired.yaw - state->attitude.yaw);
+		//--
 		attYawError = attitudeDesired.yaw - state->attitude.yaw;		
 		attYawError = capAngle(attYawError);
 		rateDesired.yaw = yaw_kp*attYawError;

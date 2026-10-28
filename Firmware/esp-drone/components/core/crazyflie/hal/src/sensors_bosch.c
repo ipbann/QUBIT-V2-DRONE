@@ -57,7 +57,7 @@
 #include "bmi088.h"
 #include "bmi160.h"
 #include "bmm150.h"
-// #include "bmp280.h"
+#include "bmp280.h"
 #include "bmp3.h"
 #include "bstdr_comm_support.h"
 #include "static_mem.h"

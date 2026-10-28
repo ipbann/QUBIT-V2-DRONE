@@ -27,7 +27,7 @@ static struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
 //#define WIFI_SSID      "Udp Server"
 static char WIFI_SSID[32] = "QUBIT-V2-DRONE";
 static char WIFI_PWD[64] = "12345678" ;
-static uint8_t WIFI_CH = 1;
+static uint8_t WIFI_CH = 1; 
 #define MAX_STA_CONN (3)
 
 #ifndef MAC2STR

@@ -67,6 +67,7 @@ $<TARGET_FILE:__idf_mqtt>
 $<TARGET_FILE:__idf_openssl>
 $<TARGET_FILE:__idf_perfmon>
 $<TARGET_FILE:__idf_spiffs>
+$<TARGET_FILE:__idf_usb>
 $<TARGET_FILE:__idf_ulp>
 $<TARGET_FILE:__idf_wifi_provisioning>
 $<TARGET_FILE:__idf_main>
@@ -75,7 +76,7 @@ $<TARGET_FILE:__idf_platform>
 $<TARGET_FILE:__idf_i2c_bus>
 $<TARGET_FILE:__idf_deck>
 $<TARGET_FILE:__idf_mpu6050>
-$<TARGET_FILE:__idf_ms5611>
+$<TARGET_FILE:__idf_bmp280>
 $<TARGET_FILE:__idf_hmc5883l>
 $<TARGET_FILE:__idf_pmw3901>
 $<TARGET_FILE:__idf_vl53l1>

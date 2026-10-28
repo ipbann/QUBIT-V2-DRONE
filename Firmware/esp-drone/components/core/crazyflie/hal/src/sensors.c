@@ -27,6 +27,7 @@
  */
 
 #define DEBUG_MODULE "SENSORS"
+#define SENSORS_FORCE SensorImplementation_mpu6050_HMC5883L_BMP280
 
 #include "sensors.h"
 #include "platform.h"
@@ -52,8 +53,8 @@
   #include "sensors_bosch.h"
 #endif
 
-#ifdef SENSOR_INCLUDED_MPU6050_HMC5883L_MS5611
-#include "sensors_mpu6050_hm5883L_ms5611.h"
+#ifdef SENSOR_INCLUDED_MPU6050_HMC5883L_BMP280
+#include "sensors_mpu6050_hm5883L_bmp280.h"
 #endif
 
 typedef struct {
@@ -112,20 +113,20 @@ static const sensorsImplementation_t sensorImplementations[SensorImplementation_
     .dataAvailableCallback = sensorsBmi088SpiBmp388DataAvailableCallback,
   },
 #endif
-#ifdef SENSOR_INCLUDED_MPU6050_HMC5883L_MS5611
+#ifdef SENSOR_INCLUDED_MPU6050_HMC5883L_BMP280
   {
-    .implements = SensorImplementation_mpu6050_HMC5883L_MS5611,
-    .init = sensorsMpu6050Hmc5883lMs5611Init,
-    .test = sensorsMpu6050Hmc5883lMs5611Test,
-    .areCalibrated = sensorsMpu6050Hmc5883lMs5611AreCalibrated,
-    .manufacturingTest = sensorsMpu6050Hmc5883lMs5611ManufacturingTest,
-    .acquire = sensorsMpu6050Hmc5883lMs5611Acquire,
-    .waitDataReady = sensorsMpu6050Hmc5883lMs5611WaitDataReady,
-    .readGyro = sensorsMpu6050Hmc5883lMs5611ReadGyro,
-    .readAcc = sensorsMpu6050Hmc5883lMs5611ReadAcc,
-    .readMag = sensorsMpu6050Hmc5883lMs5611ReadMag,
-    .readBaro = sensorsMpu6050Hmc5883lMs5611ReadBaro,
-    .setAccMode = sensorsMpu6050Hmc5883lMs5611SetAccMode,
+    .implements = SensorImplementation_mpu6050_HMC5883L_BMP280,
+    .init = sensorsMpu6050Hmc5883lBmp280Init,
+    .test = sensorsMpu6050Hmc5883lBmp280Test,
+    .areCalibrated = sensorsMpu6050Hmc5883lBmp280AreCalibrated,
+    .manufacturingTest = sensorsMpu6050Hmc5883lBmp280ManufacturingTest,
+    .acquire = sensorsMpu6050Hmc5883lBmp280Acquire,
+    .waitDataReady = sensorsMpu6050Hmc5883lBmp280WaitDataReady,
+    .readGyro = sensorsMpu6050Hmc5883lBmp280ReadGyro,
+    .readAcc = sensorsMpu6050Hmc5883lBmp280ReadAcc,
+    .readMag = sensorsMpu6050Hmc5883lBmp280ReadMag,
+    .readBaro = sensorsMpu6050Hmc5883lBmp280ReadBaro,
+    .setAccMode = sensorsMpu6050Hmc5883lBmp280SetAccMode,
     .dataAvailableCallback = nullFunction,
   }
 #endif

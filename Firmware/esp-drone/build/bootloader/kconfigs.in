@@ -1,5 +1,5 @@
 source "C:/Espressif/frameworks/esp-idf-v4.4/components/efuse/Kconfig"
-source "C:/Espressif/frameworks/esp-idf-v4.4/components/esp32/Kconfig"
+source "C:/Espressif/frameworks/esp-idf-v4.4/components/esp32s3/Kconfig"
 source "C:/Espressif/frameworks/esp-idf-v4.4/components/esp_common/Kconfig"
 source "C:/Espressif/frameworks/esp-idf-v4.4/components/esp_hw_support/Kconfig"
 source "C:/Espressif/frameworks/esp-idf-v4.4/components/esp_system/Kconfig"

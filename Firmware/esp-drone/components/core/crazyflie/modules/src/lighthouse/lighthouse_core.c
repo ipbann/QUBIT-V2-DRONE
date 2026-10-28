@@ -193,7 +193,7 @@ TESTABLE_STATIC void waitForUartSynchFrame() {
 //     estimator as pre-calculated.
 // 1 = Sweep angles pushed into the estimator. Yaw error calculated outside the estimator
 //     and pushed to the estimator as a pre-calculated value.
-static uint8_t estimationMethod = 1;
+static uint8_t estimationMethod = 0;
 
 
 static void usePulseResultCrossingBeams(pulseProcessor_t *appState, pulseProcessorResult_t* angles, int basestation) {
